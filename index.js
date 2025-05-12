@@ -16,10 +16,10 @@ app.use(session({
 
 // Conexión a MySQL
 const db = mysql.createConnection({
-  DB_HOST,
-  DB_USERNAME,      
-  DB_PASSWORD, 
-  DB_DBNAME  
+  host: process.env.DB_HOST,
+  user: process.env.DB_USERNAME,      
+  password: process.env.DB_PASSWORD, 
+  database: process.env.DB_DBNAME  
 });
 
 db.connect((err) => {
@@ -43,6 +43,8 @@ app.use('/api/recursos', require('./routes/recursos'));
 app.use('/api/simulacros', require('./routes/simulacros'));
 app.use('/api/ranking', require('./routes/ranking'));
 app.use('/api/auth', require('./routes/auth'));
+
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`Servidor iniciado en el puerto ${PORT}`);
