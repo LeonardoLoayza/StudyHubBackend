@@ -14,14 +14,12 @@ app.use(session({
   saveUninitialized: false,
 }));
 
-const port = 3000;
-
 // Conexión a MySQL
 const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'a',      
-  password: 'a',  
-  database: 'studyhub'   
+  DB_HOST,
+  DB_USERNAME,      
+  DB_PASSWORD, 
+  DB_DBNAME  
 });
 
 db.connect((err) => {
@@ -46,6 +44,6 @@ app.use('/api/simulacros', require('./routes/simulacros'));
 app.use('/api/ranking', require('./routes/ranking'));
 app.use('/api/auth', require('./routes/auth'));
 
-app.listen(port, () => {
-  console.log(`Servidor iniciado en el puerto ${port}`);
+app.listen(PORT, () => {
+  console.log(`Servidor iniciado en el puerto ${PORT}`);
 });
