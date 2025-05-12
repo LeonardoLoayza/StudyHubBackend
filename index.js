@@ -17,9 +17,9 @@ app.use(session({
 // Conexión a MySQL
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
-  user: process.env.DB_USERNAME,      
+  user: process.env.DB_NAME,      
   password: process.env.DB_PASSWORD, 
-  database: process.env.DB_DBNAME  
+  database: process.env.DB_USERNAME  
 });
 
 db.connect((err) => {
