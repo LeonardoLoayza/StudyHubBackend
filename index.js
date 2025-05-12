@@ -18,7 +18,7 @@ app.use(session({
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USERNAME,      
-  password: 'm1lInUxGKIysGJ5D8r1r', 
+  password: process.env.DB_PASSWORD, 
   database: process.env.DB_DBNAME  
 });
 
