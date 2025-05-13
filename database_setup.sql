@@ -92,3 +92,4 @@ INSERT INTO ranking (id_usuario, nivel) VALUES
     (2, 'Platino'),
     (3, 'Plata');
 
+ALTER TABLE usuario ADD password VARCHAR(100) NOT NULL DEFAULT '1234';
