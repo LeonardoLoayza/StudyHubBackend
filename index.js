@@ -1,6 +1,7 @@
 const express = require('express');
 const mysql = require('mysql2');
 const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
 const cors = require('cors'); 
 require('dotenv').config();
 
@@ -28,19 +29,30 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(session({
-  secret: 'mi-secreto-super-simple',
-  resave: false,
-  saveUninitialized: false,
-}));
-// Conexión a MySQL
-const db = mysql.createConnection({
+const dbOptions = {
   host: process.env.DB_HOST,
   user: process.env.DB_USERNAME,      
   password: process.env.DB_PASSWORD, 
   database: process.env.DB_NAME  
-});
+};
 
+const db = mysql.createConnection(dbOptions);
+
+const sessionStore = new MySQLStore(dbOptions);
+
+app.use(session({
+  key: 'studyhub_session_id',
+  secret: 'mi-secreto-super-simple',
+  store: sessionStore,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false, // Cambia a true si usas HTTPS
+    maxAge: 1000 * 60 * 60 * 24 // 1 día
+  }
+}));
+
+// Verificar conexión a MySQL
 db.connect((err) => {
   if (err) {
     console.error('Error connecting: ' + err.stack);
@@ -49,7 +61,7 @@ db.connect((err) => {
   console.log('Connected to MySQL as id ' + db.threadId);
 });
 
-// Hacer la db disponible en las rutas
+// Hacer db disponible en las rutas
 app.use((req, res, next) => {
   req.db = db;
   next();
