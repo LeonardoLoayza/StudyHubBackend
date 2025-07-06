@@ -75,6 +75,7 @@ app.use('/api/recursos', require('./routes/recursos'));
 app.use('/api/simulacros', require('./routes/simulacros'));
 app.use('/api/ranking', require('./routes/ranking'));
 app.use('/api/auth', require('./routes/auth'));
+app.use('/uploads', express.static('./routes/uploads'));
 
 const PORT = process.env.PORT || 3000;
 
