@@ -49,7 +49,7 @@ router.post('/upload', upload.single('archivo'), async (req, res) => {
           console.error(err);
           return res.status(500).json({ error: 'Error al guardar recurso en la base de datos' });
         }
-        res.json({ mensaje: 'Recurso subido correctamente', recurso: nuevoRecurso });
+            res.json({ success: true, mensaje: 'Recurso subido correctamente', recurso: nuevoRecurso });
       }
     );
   } catch (err) {
@@ -64,19 +64,6 @@ router.get('/', (req, res) => {
     if (err) return res.status(500).json({ error: err });
     res.json(results);
   });
-});
-
-// Agregar recurso sin archivo
-router.post('/', (req, res) => {
-  const { titulo, descripcion, tipo, archivo, id_curso, id_usuario } = req.body;
-  req.db.query(
-    'INSERT INTO recursos (titulo, descripcion, tipo, archivo, id_curso, id_usuario) VALUES (?, ?, ?, ?, ?, ?)',
-    [titulo, descripcion, tipo, archivo, id_curso, id_usuario],
-    (err, result) => {
-      if (err) return res.status(500).json({ error: err });
-      res.status(201).json({ id: result.insertId, titulo });
-    }
-  );
 });
 
 module.exports = router;

@@ -1,9 +1,10 @@
 const express = require('express');
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 const session = require('express-session');
-const MySQLStore = require('express-mysql-session')(session);
 const cors = require('cors'); 
 require('dotenv').config();
+const path = require('path');
+const fs = require('fs');
 
 const app = express(); 
 
@@ -11,6 +12,10 @@ const allowedOrigins = [
   'http://localhost:5173', 
   'https://studyhubfrontend-5pmm.onrender.com'
 ];
+
+if (!fs.existsSync('uploads')) {
+  fs.mkdirSync('uploads');
+}
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -29,31 +34,20 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const dbOptions = {
+app.use(session({
+  secret: 'mi-secreto-super-simple',
+  resave: false,
+  saveUninitialized: false,
+}));
+
+// ConexiÃ³n a MySQL
+const db = await mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USERNAME,      
   password: process.env.DB_PASSWORD, 
   database: process.env.DB_NAME  
-};
+});
 
-const db = mysql.createConnection(dbOptions);
-
-const sessionStore = new MySQLStore(dbOptions);
-
-app.use(session({
-  key: 'studyhub_session_id',
-  secret: 'mi-secreto-super-simple',
-  store: sessionStore,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: true, 
-    sameSite: 'none', 
-    maxAge: 1000 * 60 * 60 * 24
-  }
-}));
-
-// Verificar conexión a MySQL
 db.connect((err) => {
   if (err) {
     console.error('Error connecting: ' + err.stack);
@@ -62,7 +56,7 @@ db.connect((err) => {
   console.log('Connected to MySQL as id ' + db.threadId);
 });
 
-// Hacer db disponible en las rutas
+// Hacer la db disponible en las rutas
 app.use((req, res, next) => {
   req.db = db;
   next();
@@ -75,10 +69,32 @@ app.use('/api/recursos', require('./routes/recursos'));
 app.use('/api/simulacros', require('./routes/simulacros'));
 app.use('/api/ranking', require('./routes/ranking'));
 app.use('/api/auth', require('./routes/auth'));
-app.use('/uploads', express.static('./routes/uploads'));
+app.use('/uploads', express.static('uploads'));
 
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`Servidor iniciado en el puerto ${PORT}`);
+});
+
+// app.get('static/metadata.rdf', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'static/metadata.rdf'), {
+//     headers: {
+//       'Content-Type': 'application/rdf+xml' // Tipo MIME para RDF/XML
+//     }
+//   });
+// });
+
+//Ruta GET personalizada para servir maetadata.rdf
+app.get('/rdf', (req, res) => {
+  const filePath = path.join(__dirname, 'static', 'metadata.rdf');
+  res.sendFile(filePath, {
+    headers: {
+      'Content-Type': 'application/rdf+xml'
+    }
+  });
+});
+
+app.listen(3000, () => {
+  console.log('Servidor corriendo en http://localhost:3000');
 });
