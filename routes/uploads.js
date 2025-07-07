@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const pool = require('../config/db'); // tu conexión MySQL
+const pool = require('db.js'); // tu conexión MySQL
 
 // Configuración de almacenamiento multer local
 const storage = multer.diskStorage({

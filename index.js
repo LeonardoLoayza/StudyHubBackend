@@ -1,10 +1,10 @@
 const express = require('express');
-const mysql = require('mysql2/promise');
 const session = require('express-session');
 const cors = require('cors');
 require('dotenv').config();
 const path = require('path');
 const fs = require('fs');
+const db = require('./db'); // 👉 nuevo: importamos el pool
 
 const app = express();
 
@@ -39,24 +39,7 @@ app.use(session({
   saveUninitialized: false,
 }));
 
-// Conexión a MySQL
-let db;
-(async () => {
-  try {
-    db = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME
-    });
-    console.log('Conexión a MySQL exitosa.');
-  } catch (err) {
-    console.error('Error al conectar a MySQL:', err);
-    process.exit(1); // Sale del proceso si no conecta
-  }
-})();
-
-// Hacer la db disponible en las rutas
+// Middleware para inyectar la db en cada request
 app.use((req, res, next) => {
   req.db = db;
   next();
@@ -67,7 +50,7 @@ app.use('/api/cursos', require('./routes/cursos'));
 app.use('/api/usuarios', require('./routes/usuarios'));
 app.use('/api/recursos', require('./routes/recursos'));
 app.use('/api/simulacros', require('./routes/simulacros'));
-// app.use('/api/ranking', require('./routes/ranking'));
+app.use('/api/ranking', require('./routes/ranking'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/uploads', express.static('uploads'));
 
