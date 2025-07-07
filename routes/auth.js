@@ -2,61 +2,62 @@ const express = require('express');
 const router = express.Router();
 
 // LOGIN
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
     return res.status(400).json({ error: 'Faltan campos' });
   }
 
-  const sql = 'SELECT id_usuario, nombre, email, fecha_registro, ultimo_acceso, universidad FROM usuario WHERE email = ? AND password = ?';
-
-  req.db.query(sql, [email, password], (err, results) => {
-    if (err) {
-      console.error('Error al consultar:', err);
-      return res.status(500).json({ error: 'Error en el servidor' });
-    }
+  try {
+    const [results] = await req.db.query(
+      'SELECT id_usuario, nombre, email, fecha_registro, ultimo_acceso, universidad FROM usuario WHERE email = ? AND password = ?',
+      [email, password]
+    );
 
     if (results.length === 0) {
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
+    // Guardar sesión
     req.session.usuario = results[0];
+
     res.json({ mensaje: 'Login exitoso', usuario: results[0] });
-  });
+
+  } catch (err) {
+    console.error('Error en login:', err);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
 });
 
 // REGISTRO
-router.post('/signup', (req, res) => {
+router.post('/signup', async (req, res) => {
   const { nombre, email, password, universidad } = req.body;
 
   if (!nombre || !email || !password || !universidad) {
     return res.status(400).json({ error: 'Faltan campos' });
   }
 
-  const checkSql = 'SELECT * FROM usuario WHERE email = ?';
-
-  req.db.query(checkSql, [email], (err, existing) => {
-    if (err) {
-      console.error('Error al consultar:', err);
-      return res.status(500).json({ error: 'Error en el servidor' });
-    }
+  try {
+    // Verificar si ya existe
+    const [existing] = await req.db.query('SELECT * FROM usuario WHERE email = ?', [email]);
 
     if (existing.length > 0) {
       return res.status(400).json({ error: 'Correo ya registrado' });
     }
 
-    const insertSql = 'INSERT INTO usuario (nombre, email, password, universidad, fecha_registro, ultimo_acceso) VALUES (?, ?, ?, ?, NOW(), NOW())';
+    // Insertar nuevo usuario
+    await req.db.query(
+      'INSERT INTO usuario (nombre, email, password, universidad) VALUES (?, ?, ?, ?)',
+      [nombre, email, password, universidad]
+    );
 
-    req.db.query(insertSql, [nombre, email, password, universidad], (err, result) => {
-      if (err) {
-        console.error('Error al insertar:', err);
-        return res.status(500).json({ error: 'Error al registrar usuario' });
-      }
+    res.json({ mensaje: 'Registro exitoso' });
 
-      res.json({ mensaje: 'Registro exitoso' });
-    });
-  });
+  } catch (err) {
+    console.error('Error en signup:', err);
+    res.status(500).json({ error: 'Error al registrar usuario' });
+  }
 });
 
 // PERFIL

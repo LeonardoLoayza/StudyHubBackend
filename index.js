@@ -5,6 +5,8 @@ require('dotenv').config();
 const path = require('path');
 const fs = require('fs');
 const db = require('./routes/db'); // 👉 nuevo: importamos el pool
+const authRoutes = require('./routes/auth');
+app.use('/api', authRoutes);
 
 const app = express();
 
