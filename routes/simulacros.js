@@ -1,27 +1,40 @@
 const express = require('express');
 const router = express.Router();
+const db = require('./routes/db'); // 👉 nuevo: importamos el pool
 
-// Obtener todos los simulacros
-router.get('/', (req, res) => {
-  const db = req.db;
-  db.query('SELECT * FROM simulacros_examenes', (err, results) => {
-    if (err) return res.status(500).json({ error: err });
-    res.json(results);
-  });
+// Guardar un puntaje
+router.post('/guardar', async (req, res) => {
+  const { duracion, preguntas, puntaje, id_curso, id_usuario } = req.body;
+
+  try {
+    await db.query(
+      'INSERT INTO simulacros_examenes (duracion, preguntas, puntaje, fecha_realizacion, id_curso, id_usuario) VALUES (?, ?, ?, NOW(), ?, ?)',
+      [duracion, preguntas, puntaje, id_curso, id_usuario]
+    );
+    res.json({ success: true, message: 'Puntaje guardado correctamente' });
+  } catch (error) {
+    console.error('Error guardando puntaje:', error);
+    res.status(500).json({ success: false, message: 'Error guardando puntaje' });
+  }
 });
 
-// Agregar simulacro
-router.post('/', (req, res) => {
-  const db = req.db;
-  const { duracion, preguntas, puntaje, id_curso, id_usuario } = req.body;
-  db.query(
-    'INSERT INTO simulacros_examenes (duracion, preguntas, puntaje, id_curso, id_usuario) VALUES (?, ?, ?, ?, ?)',
-    [duracion, preguntas, puntaje, id_curso, id_usuario],
-    (err, result) => {
-      if (err) return res.status(500).json({ error: err });
-      res.status(201).json({ id: result.insertId });
-    }
-  );
+// Obtener todos los puntajes de un usuario
+router.get('/usuario/:id_usuario', async (req, res) => {
+  const { id_usuario } = req.params;
+  try {
+    const [result] = await db.query(
+      `SELECT s.*, c.nombre_curso 
+       FROM simulacros_examenes s 
+       JOIN cursos c ON s.id_curso = c.id_curso 
+       WHERE s.id_usuario = ? 
+       ORDER BY s.fecha_realizacion DESC`,
+      [id_usuario]
+    );
+    res.json(result);
+  } catch (error) {
+    console.error('Error al obtener puntajes:', error);
+    res.status(500).json({ message: 'Error al obtener puntajes' });
+  }
 });
 
 module.exports = router;
