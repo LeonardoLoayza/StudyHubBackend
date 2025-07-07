@@ -22,7 +22,7 @@ router.post('/guardar', async (req, res) => {
 router.get('/puntajes/usuario/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    const [resultados] = await connection.query(
+    const [resultados] = await db.query(
       `SELECT 
         s.*, 
         c.nombre_curso
