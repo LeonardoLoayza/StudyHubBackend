@@ -4,7 +4,7 @@ const cors = require('cors');
 require('dotenv').config();
 const path = require('path');
 const fs = require('fs');
-const db = require('/routes/db'); // 👉 nuevo: importamos el pool
+const db = require('./routes/db'); // 👉 nuevo: importamos el pool
 
 const app = express();
 
