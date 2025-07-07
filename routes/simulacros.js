@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('./routes/db'); // 👉 nuevo: importamos el pool
+const db = require('./db'); // 👉 nuevo: importamos el pool
 
 // Guardar un puntaje
 router.post('/guardar', async (req, res) => {
