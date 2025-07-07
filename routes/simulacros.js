@@ -19,22 +19,25 @@ router.post('/guardar', async (req, res) => {
 });
 
 // Obtener todos los puntajes de un usuario
-router.get('/usuario/:id_usuario', async (req, res) => {
-  const { id_usuario } = req.params;
+router.get('/puntajes/usuario/:id', async (req, res) => {
+  const { id } = req.params;
   try {
-    const [result] = await db.query(
-      `SELECT s.*, c.nombre_curso 
-       FROM simulacros_examenes s 
-       JOIN cursos c ON s.id_curso = c.id_curso 
-       WHERE s.id_usuario = ? 
-       ORDER BY s.fecha_realizacion DESC`,
-      [id_usuario]
+    const [resultados] = await connection.query(
+      `SELECT 
+        s.*, 
+        c.nombre_curso
+      FROM simulacros_examenes s
+      JOIN curso c ON s.id_curso = c.id_curso
+      WHERE s.id_usuario = ?
+      ORDER BY s.fecha_realizacion DESC`,
+      [id]
     );
-    res.json(result);
+    res.json(resultados);
   } catch (error) {
     console.error('Error al obtener puntajes:', error);
-    res.status(500).json({ message: 'Error al obtener puntajes' });
+    res.status(500).json({ mensaje: 'Error al obtener puntajes', error });
   }
 });
+
 
 module.exports = router;
