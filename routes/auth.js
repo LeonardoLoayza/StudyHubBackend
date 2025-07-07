@@ -1,5 +1,4 @@
 const express = require('express');
-const bcrypt = require('bcrypt');
 const router = express.Router();
 
 // Login
@@ -18,9 +17,8 @@ router.post('/login', async (req, res) => {
     }
 
     const usuario = rows[0];
-    const passwordMatch = await bcrypt.compare(contrasena, usuario.contrasena);
 
-    if (!passwordMatch) {
+    if (usuario.contrasena !== contrasena) {
       return res.status(401).json({ error: 'Contraseña incorrecta' });
     }
 
@@ -55,9 +53,10 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ error: 'Correo ya registrado' });
     }
 
-    const hashedPassword = await bcrypt.hash(contrasena, 10);
-
-    await req.db.query('INSERT INTO usuarios (nombre, correo, contrasena) VALUES (?, ?, ?)', [nombre, correo, hashedPassword]);
+    await req.db.query(
+      'INSERT INTO usuarios (nombre, correo, contrasena) VALUES (?, ?, ?)',
+      [nombre, correo, contrasena]
+    );
 
     res.json({ mensaje: 'Registro exitoso' });
 
