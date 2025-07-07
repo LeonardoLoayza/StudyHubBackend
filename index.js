@@ -6,6 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const db = require('./routes/db'); // 👉 nuevo: importamos el pool
 const authRoutes = require('./routes/auth');
+const simulacrosRoutes = require('./routes/simulacros'); 
 
 const app = express();
 
@@ -54,6 +55,7 @@ app.use('/api/puntajes', require('./routes/simulacros'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/uploads', express.static('uploads'));
 app.use('/api', authRoutes);
+app.use('/api', simulacrosRoutes); // ✅ monta la ruta aquí
 
 // Servir metadata.rdf
 app.get('/rdf', (req, res) => {
