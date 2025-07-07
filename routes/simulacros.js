@@ -25,7 +25,7 @@ router.get('/puntajes/usuario/:id', async (req, res) => {
     const [resultados] = await db.query(
       `SELECT 
         s.*, 
-        c.nombre_curso
+        c.nombre
       FROM simulacros_examenes s
       JOIN curso c ON s.id_curso = c.id_curso
       WHERE s.id_usuario = ?
